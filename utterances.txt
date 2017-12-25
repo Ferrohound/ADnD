@@ -1,0 +1,7 @@
+RiddleAnswer the answer is {Answer}
+RiddleAnswer the answer's {Answer}
+RiddleAnswer it's a {Answer}
+RiddleAnswer it's {Answer}
+RiddleAnswer it's an {Answer}
+RiddleAnswer it is an {Answer}
+RiddleAnswer it is a {Answer}

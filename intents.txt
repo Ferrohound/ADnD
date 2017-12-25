@@ -1,0 +1,15 @@
+{
+  "intents": [
+    {
+      "intent": "RiddleAnswer",
+      "slots": [
+        {
+          "name": "Answer"
+        }
+      ]
+    },
+    {
+      "intent": "AMAZON.PauseIntent"
+    }
+  ]
+}
