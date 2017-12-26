@@ -59,13 +59,37 @@ const LEGENDARY_DESCRIPTION = [
 	'A Pixiu looks at you. It is a Pixiu. '
 ];
 
+const RIDDLE_CORRECT_REACTION = [
+	'The Sphynx bares his teeth. You are correct, you may pass. ',
+	'The Deva tells you you are correct and may pass. ',
+	'The Basilisk hisses violently and pulls his head back. You are correct, you may pass. ',
+	'The Lich tells you you are correct and may pass. ',
+	'The Naga tells you you are correct and may pass. ',
+	'The Pixiu tells you you are correct and may pass. '
+];
+
+const RIDDLE_INCORRECT_REACTION = [
+	'The Sphynx bares his teeth. Dinner time. ',
+	'The Deva bares its teeth. Dinner time. ',
+	'The Basilisk bares his teeth. Dinner time. ',
+	'The Lich bares his teeth. Dinner time. ',
+	'The Naga bares his teeth. Dinner time. ',
+	'The Pixiu bares his teeth. Dinner time. '
+]
+
+const RIDDLE_START = "The beast asks you a simple question. "
+
 const riddles = [
 	'What is the creature that walks on four legs in the morning, two legs at noon and three in the evening?'
 ]
 
+const RIDDLE_ANSWERS = [
+	['man', 'human', 'person', 'woman', 'people']
+]
+
 function getRiddle(){
 	var riddle = Math.floor(Math.random() * (riddles.length - 1));
-	if(riddle == 1){ return [1, 1]; }
+	if(riddle == 0){ return [0, 0]; }
 	var legendary = Math.floor(Math.random() * (legendary.length - 1));
 	return [riddle, legendary];
 }
@@ -74,6 +98,7 @@ const handlers = {
 
 	'NewSession': function () {
 		this.attributes['location'] = Math.random() * (LOCATION_DESCRIPTION.length - 1);
+		this.handler.state = states.RIDDLEMODE;
 		this.emit(':ask', WELCOME_DIALOGUE + LOCATION_DESCRIPTION[this.attributes['location']], START_REMINDER);
 	},
 	
@@ -81,51 +106,24 @@ const handlers = {
 
 const riddleModeHandlers = Alexa.CreateStateHandler(states.RIDDLEMODE, {
 
-'NumberGuessIntent': function() {
-	const guessNum = parseInt(this.event.request.intent.slots.number.value);
-	const targetNum = this.attributes['guessNumber'];
+	'AMAZON.YesIntent': function() {
+		this.attributes['riddleInfo'] = getRiddle();
+		this.emit(':ask', LEGENDARY_DESCRIPTION[this.attributes['riddleInfo'][1]] + RIDDLE_START + riddles[this.attributes['riddleInfo'][0]], riddles[this.attributes['riddleInfo'][0]]);
+	},
 
-	console.log('user guessed: ' + guessNum);
+	'AMAZON.NoIntent': function() {
+		this.emit(':tell', "Return when you are ready to be a hero. ");
+	},
 
-	if(guessNum > targetNum){
-		this.emit('TooHigh', guessNum);
-	} else if( guessNum < targetNum){
-		this.emit('TooLow', guessNum);
-	} else if (guessNum === targetNum){
-		// With a callback, use the arrow function to preserve the correct 'this' context
-		this.emit('JustRight', () => {
-			this.response.speak(guessNum.toString() + 'is correct! Would you like to play a new game?')
-						.listen('Say yes to start a new game, or no to end the game.');
-			this.emit(':responseReady');
-		});
-	} else {
-		this.emit('NotANum');
+	'AnswerIntent': function() {
+		
 	}
-},
 
-'AMAZON.HelpIntent': function() {
-	this.response.speak('I am thinking of a number between zero and one hundred, try to guess and I will tell you' +
-	' if it is higher or lower.')
-				.listen('Try saying a number.');
-	this.emit(':responseReady');
-},
-
-'SessionEndedRequest': function () {
-	console.log('session ended!');
-	this.attributes['endedSessionCount'] += 1;
-	this.emit(':saveState', true); // Be sure to call :saveState to persist your session attributes in DynamoDB
-},
-
-'Unhandled': function() {
-	this.response.spean('Sorry, I didn\'t get that. Try saying a number.')
-				.listen('Try saying a number.');
-	this.emit(':responseReady');
-}
 });
 
 exports.handler = function(event, context, callback) {
 	const alexa = Alexa.handler(event, context, callback);
 	alexa.APP_ID = APP_ID; // APP_ID is your skill id which can be found in the Amazon developer console where you create the skill.
-	alexa.registerHandlers(handlers);
+	alexa.registerHandlers(handlers, riddleModeHandlers);
 	alexa.execute();
 };
