@@ -51,7 +51,7 @@ const legendary = [
 ];
 
 const LEGENDARY_DESCRIPTION = [
-	'Pawing gently towards you is a terrifying beast. It is has the head of a man in an ornate head dress, with the body of a lion. It is the mighty sphynx. ',
+	'Pawing gently towards you is a terrifying beast. It has the head of a man in an ornate head dress, with the body of a lion. It is the mighty sphynx. ',
 	'A Deva looks at you. It is a Deva. ',
 	'The entire room is wrapped with thick scaley vines as black as night. It is impossible to tell where the body of the snake ends, but it begins at the head which rises before you, as the powerful Basilisk smells dinner. ',
 	'A Lich looks at you. It is a Lich. ',
@@ -115,8 +115,13 @@ const riddleModeHandlers = Alexa.CreateStateHandler(states.RIDDLEMODE, {
 		this.emit(':tell', "Return when you are ready to be a hero. ");
 	},
 
-	'AnswerIntent': function() {
-		
+	'RiddleAnswer': function() {
+		var answer = this.event.request.intent.slots.answer.value;
+		if (RIDDLE_ANSWERS[this.attributes['riddleInfo'][0]].indexOf(answer) != -1){
+			this.emit(':tell', RIDDLE_CORRECT_REACTION[this.attributes['riddleInfo'][1]]);
+		}else{
+			this.emit(':tell', RIDDLE_INCORRECT_REACTION[this.attributes['riddleInfo'][1]]);
+		}
 	}
 
 });
