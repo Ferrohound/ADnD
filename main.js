@@ -171,10 +171,50 @@ should also have a hint ability
 
 
 /*======================================================================================
-puzzle room is more like a state machine than the others, each probably needs to be hand crafted..
+pattern room is more like a state machine than the others, each probably needs to be hand crafted..
 for now anyway.
 should also have a hint ability
 //======================================================================================*/
+
+function PatternRoom(pattern, solution)
+{
+	Room.call(this);
+	this.pattern = pattern;
+	this.solution = solution;
+}
+
+PatternRoom.prototype = Object.create(Room.prototype);
+PatternRoom.prototype.constructor = PatternRoom;
+
+PatternRoom.prototype.Update = function()
+{
+	while(true)
+	{
+		alert(this.pattern);
+		var input = this.GetInput();
+		if(input == null)
+			continue;
+			
+		switch(this.state)
+		{
+			case 0:
+				if(input == this.solution)
+				{
+					alert("Correct answer!");
+					return 1;
+				}
+			break;
+				
+			case 1:
+			break;
+			
+			default:
+				alert("Please try something else!");
+			break;		
+		}
+	}
+	return 0;
+};
 
 
 /*======================================================================================
@@ -190,9 +230,12 @@ function main()
 	var R = new Room();
 	var T = new Room();
 	var B = new BattleRoom();
+	var P = new PatternRoom("1, 2, 3, 4, 5..........", "6");
 	
+	//first solution is Dog
 	D.LoadRoom(R);
-	D.LoadRoom(B);
+	//D.LoadRoom(B);
+	D.LoadRoom(P);
 	
 	D.Play();
 	
