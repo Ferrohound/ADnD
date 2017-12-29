@@ -363,6 +363,6 @@ const battleModeHandlers = Alexa.CreateStateHandler(states.BATTLEMODE, {
 exports.handler = function(event, context, callback) {
 	const alexa = Alexa.handler(event, context, callback);
 	alexa.APP_ID = APP_ID; // APP_ID is your skill id which can be found in the Amazon developer console where you create the skill.
-	alexa.registerHandlers(handlers, riddleModeHandlers, patternModeHandlers);
+	alexa.registerHandlers(handlers, riddleModeHandlers, patternModeHandlers, battleModeHandlers);
 	alexa.execute();
 };
