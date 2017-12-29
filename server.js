@@ -1,3 +1,94 @@
+//===============================================================================
+/*
+enemies for the battle rooms
+*/
+//maybe actor base class
+
+//have player and enemy stats that play into this
+function Attack(A, D)
+{
+	D.hp--;
+	if(D.hp < 0)
+		D.state = -1;
+}
+
+
+//state -1 means defeated
+//take in arguments later, ideally pass in an array of descriptions for each state it's in
+function Enemy(hp)
+{
+	this.hp = hp;
+	this.state = 0;
+	this.name = "Spatos";
+};
+
+//have a thing in here that changes the enemy's state based on the player's previous actions
+//or hp
+Enemy.prototype.Act = function(player)
+{
+	switch(state)
+	{
+		case 0:
+			Attack(this, player);
+		break;
+		
+		default:
+		break;
+	};
+};
+
+Enemy.prototype.Description = function()
+{
+	switch(state)
+	{
+		case 0:
+			return "Monster is very descriptive! It has a colourful vocabulary.";
+		break;
+		
+		default:
+			return "Something seems different... Hey! This isn't descriptive at all!";
+		break;
+	};
+}
+
+//state -1 means defeated
+function Player(hp)
+{
+	this.hp = hp;
+	this.state = 0;
+};
+
+Player.prototype.Act = function(flag, enemy = null)
+{
+	// 0: attack
+	// 1: magic attack
+	// 2: defense/evade
+	// 3: investigate
+	switch(flag)
+	{
+		case 0:
+			Attack(this, enemy);
+			this.state = 0;
+		break;
+		
+		case 1:
+			Attack(this, enemy);
+			this.state = 0;
+		break;
+		
+		case 2:
+			this.state = 1;
+		break;
+		
+		case 3:
+			Enemy.Description();
+			this.state = 0;
+		break;
+		
+	}
+}
+//===============================================================================
+
 const Alexa = require('alexa-sdk');
 const APP_ID = undefined;  //replace with your app ID (OPTIONAL).
 
@@ -15,7 +106,7 @@ const states = {
 	RIDDLEMODE  : '_RIDDLEMODE',
 	PUZZLEMODE  : '_PUZZLEMODE',
 	PATTERNMODE : '_PATTERNMODE',
-	FIGHTMODE   : '_FIGHTMODE'
+	BATTLEMODE   : '_BATTLEMODE'
 }
 
 const creatures = [
@@ -147,7 +238,7 @@ const riddleModeHandlers = Alexa.CreateStateHandler(states.RIDDLEMODE, {
 
 });
 
-const patternModeHandlers = Alexa.CreateStateHandler(states.RIDDLEMODE, {
+const patternModeHandlers = Alexa.CreateStateHandler(states.PATTERNMODE, {
 
 	'AMAZON.YesIntent': function() {
 		var pattern = getPattern();
@@ -172,6 +263,101 @@ const patternModeHandlers = Alexa.CreateStateHandler(states.RIDDLEMODE, {
 		}
 	}
 
+});
+
+const battleModeHandlers = Alexa.CreateStateHandler(states.BATTLEMODE, {
+
+	'AMAZON.YesIntent': function() {
+		this.State = 0;
+		this.Enemies = [];
+		this.Player = new Player();
+		
+		this.emit(':tell', "Several creatures block your path!");
+		
+		for(var i = 0; i<this.Enemies.length; i++)
+		{
+			this.emit(':tell', this.Enemies[i].Description());
+		}
+	},
+
+	'AMAZON.NoIntent': function() {
+		this.emit(':tell', "Return when you are ready to be a hero. ");
+	},
+
+	'Attack': function() {
+		//I'm assuming this is how you'd get the answer
+		this.emit(':ask', "Which Enemy? Select a number from 0 to " + (this.Enemies.length - 1));
+		var answer = this.event.request.intent.slots.attack.value;
+		
+		if(answer >= this.Enemies.length)
+			this.emit(':tell', "Invalid Enemy!");
+		else
+		{
+			this.emit(':tell', "You strike at " + this.Enemies[input].name + "!");
+			this.Player.Act(0, this.Enemies[input]);
+		}
+		
+		this.State = 1;
+	}
+	
+	'Spell': function() {
+		//I'm assuming this is how you'd get the answer
+		this.emit(':ask', "Which Enemy? Select a number from 0 to " + (this.Enemies.length - 1));
+		var answer = this.event.request.intent.slots.attack.value;
+		
+		if(answer >= this.Enemies.length)
+			this.emit(':tell', "Invalid Enemy!");
+		else
+		{
+			this.emit(':tell', "You wave your wand at " + this.Enemies[input].name + "!");
+			this.Player.Act(1, this.Enemies[input]);
+		}
+		
+		this.State = 1;
+	}
+	
+	'Defend': function() {
+		
+		this.emit(':tell', "You brace for impact!");
+		this.Player.Act(2);
+		
+		this.State = 1;
+	}
+	
+	/*
+	//winning or losing a battle
+	if(this.state == 2)
+	{
+		alert("You won the battle!");
+	}
+	else
+	{
+		alert("Your party was slain in battle...please try again!");
+	}
+	
+	//enemy makes their move, state 3 means the player dies, otherwise the player 
+	//takes their turn
+	for(var i = 0; i<this.Enemies.length; i++)
+	{
+		this.Enemies[i].Act(this.player);
+	}
+	if(this.player.state == -1)
+		this.state = 3;
+	else
+		this.state = 0;
+	
+	//after the player makes their move, check if all enemies are defeated, and if so,
+	//end the battle
+	
+	this.state = 2;
+				
+	for(var i = 0; i<this.Enemies.length; i++)
+	{
+		if(this.Enemies[i].state != -1)
+			this.state = 1;
+	}
+	
+	*/
 });
 
 exports.handler = function(event, context, callback) {
