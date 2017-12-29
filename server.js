@@ -5,11 +5,22 @@ enemies for the battle rooms
 //maybe actor base class
 
 //have player and enemy stats that play into this
-function Attack(A, D)
+function Attack(A, D, Alexa)
 {
 	D.hp--;
 	if(D.hp < 0)
 		D.state = -1;
+	
+	Alexa.emit(':tell', A.name + " strikes " D.name + " with all of their might!");
+}
+
+function MagicAttack(A, D, Alexa)
+{
+	D.hp--;
+	if(D.hp < 0)
+		D.state = -1;
+	
+	Alexa.emit(':tell', A.name + "'s magic ravages " D.name + "!");
 }
 
 
@@ -24,12 +35,12 @@ function Enemy(hp)
 
 //have a thing in here that changes the enemy's state based on the player's previous actions
 //or hp
-Enemy.prototype.Act = function(player)
+Enemy.prototype.Act = function(player, Alexa)
 {
 	switch(state)
 	{
 		case 0:
-			Attack(this, player);
+			Attack(this, player, Alexa);
 		break;
 		
 		default:
@@ -58,7 +69,7 @@ function Player(hp)
 	this.state = 0;
 };
 
-Player.prototype.Act = function(flag, enemy = null)
+Player.prototype.Act = function(flag, Alexa, enemy = null)
 {
 	// 0: attack
 	// 1: magic attack
@@ -67,16 +78,17 @@ Player.prototype.Act = function(flag, enemy = null)
 	switch(flag)
 	{
 		case 0:
-			Attack(this, enemy);
+			Attack(this, enemy, Alexa);
 			this.state = 0;
 		break;
 		
 		case 1:
-			Attack(this, enemy);
+			MagicAttack(this, enemy, Alexa);
 			this.state = 0;
 		break;
 		
 		case 2:
+			Alexa.emit(':tell', "You brace for impact!");
 			this.state = 1;
 		break;
 		
@@ -284,7 +296,8 @@ const battleModeHandlers = Alexa.CreateStateHandler(states.BATTLEMODE, {
 		this.emit(':tell', "Return when you are ready to be a hero. ");
 	},
 
-	'Attack': function() {
+	'Attack': function() 
+	{
 		//I'm assuming this is how you'd get the answer
 		this.emit(':ask', "Which Enemy? Select a number from 0 to " + (this.Enemies.length - 1));
 		var answer = this.event.request.intent.slots.attack.value;
@@ -293,14 +306,21 @@ const battleModeHandlers = Alexa.CreateStateHandler(states.BATTLEMODE, {
 			this.emit(':tell', "Invalid Enemy!");
 		else
 		{
-			this.emit(':tell', "You strike at " + this.Enemies[input].name + "!");
-			this.Player.Act(0, this.Enemies[input]);
+			this.Player.Act(0, this, this.Enemies[input]);
 		}
 		
-		this.State = 1;
+		for(var i = 0; i<this.Enemies.length; i++)
+		{
+			if(this.Enemies[i].state != -1)
+				this.emitWithState("EnemyPhase");
+		}
+		
+		//battle was won!
+		//this.handler.state = "BATTLEWON";
 	}
 	
-	'Spell': function() {
+	'Spell': function() 
+	{
 		//I'm assuming this is how you'd get the answer
 		this.emit(':ask', "Which Enemy? Select a number from 0 to " + (this.Enemies.length - 1));
 		var answer = this.event.request.intent.slots.attack.value;
@@ -309,19 +329,55 @@ const battleModeHandlers = Alexa.CreateStateHandler(states.BATTLEMODE, {
 			this.emit(':tell', "Invalid Enemy!");
 		else
 		{
-			this.emit(':tell', "You wave your wand at " + this.Enemies[input].name + "!");
-			this.Player.Act(1, this.Enemies[input]);
+			this.Player.Act(1, this, this.Enemies[input]);
 		}
 		
-		this.State = 1;
+		for(var i = 0; i<this.Enemies.length; i++)
+		{
+			if(this.Enemies[i].state != -1)
+				this.emitWithState("EnemyPhase");
+		}
+		
+		//battle was won!
+		//this.handler.state = "BATTLEWON";
 	}
 	
-	'Defend': function() {
+	'Defend': function() 
+	{
+		this.Player.Act(2, this);
 		
-		this.emit(':tell', "You brace for impact!");
-		this.Player.Act(2);
+		//this.State = 1;
+		this.emitWithState("EnemyPhase");
+	}
+	
+	'EnemyPhase': function()
+	{
+		//enemy makes their move, state 3 means the player dies, otherwise the player 
+		//takes their turn
+		for(var i = 0; i<this.Enemies.length; i++)
+		{
+			this.Enemies[i].Act(this.player, this);
+		}
+		if(this.Player.state == -1)
+		{
+			//this.state = 3;
+			//the player is dead, go to gameOver state
+			//this.handler.state = "ASKMODE";
+		}
 		
-		this.State = 1;
+		var tmp = true;
+		//in case I add an enemy that can self-destruct
+		for(var i = 0; i<this.Enemies.length; i++)
+		{
+			if(this.Enemies[i].state != -1)
+				tmp = false;
+		}
+		
+		if(tmp)
+		{
+			//battle was won!
+			//this.handler.state = "BATTLEWON";
+		}
 	}
 	
 	/*
