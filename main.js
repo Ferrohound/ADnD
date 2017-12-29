@@ -125,9 +125,102 @@ Player's hp and stats reset each battle
 Player and enemies take turn attacking each other
 //======================================================================================*/
 
-function BattleRoom()
+/*
+enemies for the battle rooms
+*/
+//maybe actor base class
+
+//have player and enemy stats that play into this
+function Attack(A, D)
+{
+	D.hp--;
+	if(D.hp < 0)
+		D.state = -1;
+}
+
+
+//state -1 means defeated
+//take in arguments later
+function Enemy(hp)
+{
+	this.hp = hp;
+	this.state = 0;
+	this.name = "Spatos";
+};
+
+//have a thing in here that changes the enemy's state based on the player's previous actions
+//or hp
+Enemy.prototype.Act = function(player)
+{
+	switch(state)
+	{
+		case 0:
+			Attack(this, player);
+		break;
+		
+		default:
+		break;
+	};
+};
+
+Enemy.prototype.Description = function()
+{
+	switch(state)
+	{
+		case 0:
+			Alert("Monster looks very descriptive!");
+		break;
+		
+		default:
+			Alert("Something seems different...");
+		break;
+	};
+}
+
+//state -1 means defeated
+function Player(hp)
+{
+	this.hp = hp;
+	this.state = 0;
+};
+
+Player.prototype.Act = function(flag, enemy = null)
+{
+	// 0: attack
+	// 1: magic attack
+	// 2: defense/evade
+	// 3: investigate
+	switch(flag)
+	{
+		case 0:
+			Attack(this, enemy);
+			this.state = 0;
+		break;
+		
+		case 1:
+			Attack(this, enemy);
+			this.state = 0;
+		break;
+		
+		case 2:
+			this.state = 1;
+		break;
+		
+		case 3:
+			Enemy.Description();
+			this.state = 0;
+		break;
+		
+	}
+}
+
+//the actual room ===================================================================
+
+function BattleRoom(Enemies)
 {
 	Room.call(this);
+	this.Enemies = Enemies;
+	this.player = new Player();
 }
 
 BattleRoom.prototype = Object.create(Room.prototype);
@@ -137,7 +230,11 @@ BattleRoom.prototype.Update = function()
 {
 	//we get an initial description of the enemy here, load in dynamically as
 	//"entrance text"
-	alert("An enemy appears before you!")
+	alert("enemies appear before you!");
+	for(var i = 0; i<this.Enemies.length; i++)
+	{
+		this.Enemies[i].Description();
+	}
 	//while loop continues until either the player's hp reaces 0 or all enemies are defeated
 	//or the player runs away successfully
 	while(this.state<2)
@@ -154,21 +251,37 @@ BattleRoom.prototype.Update = function()
 				//maybe use another switch statement here
 				if(input == "Attack")
 				{
-					alert("you strike at the enemy!");
+					var input = 
+						prompt("Which Enemy? Select a number from 0 to " + (this.Enemies.length - 1));
+					
+					if(input >= this.Enemies.length)
+						alert("Invalid Enemy!");
+					else
+					{
+						alert("you strike at " + this.Enemies[input].name + "!");
+						this.player.Act(0, this.Enemies[input]);
+					}
 					//call some function that takes in the enemy and player as an argument
 					//and does something accordingly
-					state = 1;
 				}
 				else if(input == "Spell")
 				{
-					alert("you wave your wand at the enemy!");
-					//call some function that takes in the enemy and player as an argument
-					//and does something accordingly
-					state = 1;
+					//alert("you wave your wand at the enemy!");
+					var input = 
+						prompt("Which Enemy? Select a number from 0 to " + (this.Enemies.length - 1));
+					
+					if(input >= this.Enemies.length)
+						alert("Invalid Enemy!");
+					else
+					{
+						alert("you wave your wand at " + this.Enemies[input].name + "!");
+						this.player.Act(1, this.Enemies[input]);
+					}
 				}
 				else if(input == "Guard")
 				{
 					alert("You take a defensive stance!");
+					this.player.Act(2);
 					//set the player's state to defensive
 				}
 				else if(input == "Run")
@@ -176,18 +289,32 @@ BattleRoom.prototype.Update = function()
 					alert("You try to run!");
 					//call some function that takes in the enemies and the player and does
 					//some equations
-					state = 1;
 				}
 				else
 				{
 					alert("The player does nothing.");
-					state = 1;
 				}
+				
+				this.state = 2;
+				
+				for(var i = 0; i<this.Enemies.length; i++)
+				{
+					if(this.Enemies[i].state != -1)
+						this.state = 1;
+				}
+				
 			break;
 				
 			case 1:
-				alert("Enemy forfeits its move");
-				state = 0;
+				//alert("Enemy forfeits its move");
+				for(var i = 0; i<this.Enemies.length; i++)
+				{
+					this.Enemies[i].Act(this.player);
+				}
+				if(this.player.state == -1)
+					this.state = 3;
+				else
+					this.state = 0;
 			break;
 			
 			default:
@@ -208,37 +335,6 @@ BattleRoom.prototype.Update = function()
 	return 0;
 };
 
-/*
-enemies for the battle rooms
-*/
-//maybe actor base class
-
-
-
-//take in arguments later
-function Enemy(hp)
-{
-	this.hp = hp;
-	this.state = 0;
-};
-
-Enemy.prototype.Act(player)
-{
-	switch(state)
-	{
-		case 0:
-		break;
-		
-		default:
-		break;
-	};
-};
-
-
-function Player(hp)
-{
-	this.hp = hp;
-};
 
 /*======================================================================================
 riddle room should take in a riddle string and a solution(s) string
