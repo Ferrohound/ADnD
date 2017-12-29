@@ -135,24 +135,59 @@ BattleRoom.prototype.constructor = BattleRoom;
 
 BattleRoom.prototype.Update = function()
 {
-	while(true)
+	//we get an initial description of the enemy here, load in dynamically as
+	//"entrance text"
+	alert("An enemy appears before you!")
+	//while loop continues until either the player's hp reaces 0 or all enemies are defeated
+	//or the player runs away successfully
+	while(this.state<2)
 	{
 		alert("BattleRoom update");
 		var input = this.GetInput();
 		if(input == null)
 			continue;
-			
+		
+		//ping-pong state between player move => 0 and enemy(ies) move => 1 
 		switch(this.state)
 		{
 			case 0:
-				if(input == "JohnnyCage")
+				//maybe use another switch statement here
+				if(input == "Attack")
 				{
-					alert("yes, I do like dogs!");
-					return 1;
+					alert("you strike at the enemy!");
+					//call some function that takes in the enemy and player as an argument
+					//and does something accordingly
+					state = 1;
+				}
+				else if(input == "Spell")
+				{
+					alert("you wave your wand at the enemy!");
+					//call some function that takes in the enemy and player as an argument
+					//and does something accordingly
+					state = 1;
+				}
+				else if(input == "Guard")
+				{
+					alert("You take a defensive stance!");
+					//set the player's state to defensive
+				}
+				else if(input == "Run")
+				{
+					alert("You try to run!");
+					//call some function that takes in the enemies and the player and does
+					//some equations
+					state = 1;
+				}
+				else
+				{
+					alert("The player does nothing.");
+					state = 1;
 				}
 			break;
 				
 			case 1:
+				alert("Enemy forfeits its move");
+				state = 0;
 			break;
 			
 			default:
@@ -160,7 +195,49 @@ BattleRoom.prototype.Update = function()
 			break;		
 		}
 	}
+	
+	if(this.state == 2)
+	{
+		alert("You won the battle!");
+	}
+	else
+	{
+		alert("Your party was slain in battle...please try again!");
+	}
+	
 	return 0;
+};
+
+/*
+enemies for the battle rooms
+*/
+//maybe actor base class
+
+
+
+//take in arguments later
+function Enemy(hp)
+{
+	this.hp = hp;
+	this.state = 0;
+};
+
+Enemy.prototype.Act(player)
+{
+	switch(state)
+	{
+		case 0:
+		break;
+		
+		default:
+		break;
+	};
+};
+
+
+function Player(hp)
+{
+	this.hp = hp;
 };
 
 /*======================================================================================
