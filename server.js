@@ -78,7 +78,8 @@ const RIDDLE_INCORRECT_REACTION = [
 	'The Pixiu bares his teeth. Dinner time. '
 ]
 
-const RIDDLE_START = "The beast asks you a simple question. "
+const RIDDLE_START = "The beast asks you a simple question. ";
+const CONTINUE = "Would you like to enter the next room? ";
 
 const riddles = [
 	'What is the creature that walks on four legs in the morning, two legs at noon and three in the evening?'
@@ -137,7 +138,8 @@ const riddleModeHandlers = Alexa.CreateStateHandler(states.RIDDLEMODE, {
 	'RiddleAnswer': function() {
 		var answer = this.event.request.intent.slots.answer.value;
 		if (RIDDLE_ANSWERS[this.attributes['riddleInfo'][0]].indexOf(answer) != -1){
-			this.emit(':tell', RIDDLE_CORRECT_REACTION[this.attributes['riddleInfo'][1]]);
+			this.handler.state = states.PATTERNMODE;
+			this.emit(':ask', RIDDLE_CORRECT_REACTION[this.attributes['riddleInfo'][1]] + CONTINUE, CONTINUE);
 		}else{
 			this.emit(':tell', RIDDLE_INCORRECT_REACTION[this.attributes['riddleInfo'][1]]);
 		}
@@ -164,7 +166,7 @@ const patternModeHandlers = Alexa.CreateStateHandler(states.RIDDLEMODE, {
 	'PatternAnswer': function() {
 		var answer = this.event.request.intent.slots.patternanswer.value;
 		if (this.attributes['patternNext'] == answer){
-			this.emit(':tell', "that's correct");
+			this.emit(':ask', "that's correct " + CONTINUE, CONTINUE);
 		}else{
 			this.emit(':tell', "Incorrect");
 		}
@@ -175,6 +177,6 @@ const patternModeHandlers = Alexa.CreateStateHandler(states.RIDDLEMODE, {
 exports.handler = function(event, context, callback) {
 	const alexa = Alexa.handler(event, context, callback);
 	alexa.APP_ID = APP_ID; // APP_ID is your skill id which can be found in the Amazon developer console where you create the skill.
-	alexa.registerHandlers(handlers, riddleModeHandlers);
+	alexa.registerHandlers(handlers, riddleModeHandlers, patternModeHandlers);
 	alexa.execute();
 };
