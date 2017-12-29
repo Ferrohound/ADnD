@@ -1,5 +1,5 @@
 const Alexa = require('alexa-sdk');
-const APP_ID = undefined;  // TODO replace with your app ID (OPTIONAL).
+const APP_ID = undefined;  //replace with your app ID (OPTIONAL).
 
 /*
 	generic, placeholder dialogue options
@@ -11,10 +11,11 @@ const LOCATION_DESCRIPTION = [
 const START_REMINDER = "Would you like to start this game? ";
 
 const states = {
-	STARTMODE  : '_STARTMODE',
-	RIDDLEMODE : '_RIDDLEMODE',
-	PUZZLEMODE : '_PUZZLEMODE',
-	FIGHTMODE  : '_FIGHTMODE'
+	STARTMODE   : '_STARTMODE',
+	RIDDLEMODE  : '_RIDDLEMODE',
+	PUZZLEMODE  : '_PUZZLEMODE',
+	PATTERNMODE : '_PATTERNMODE',
+	FIGHTMODE   : '_FIGHTMODE'
 }
 
 const creatures = [
@@ -81,17 +82,35 @@ const RIDDLE_START = "The beast asks you a simple question. "
 
 const riddles = [
 	'What is the creature that walks on four legs in the morning, two legs at noon and three in the evening?'
-]
+];
 
 const RIDDLE_ANSWERS = [
 	['man', 'human', 'person', 'woman', 'people']
-]
+];
+
+const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199];
+
+const fibonacci = [0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987, 1597, 2584, 4181, 6765, 10946, 17711, 28657, 46368, 75025, 121393, 196418, 317811];
 
 function getRiddle(){
 	var riddle = Math.floor(Math.random() * (riddles.length - 1));
 	if(riddle == 0){ return [0, 0]; }
-	var legendary = Math.floor(Math.random() * (legendary.length - 1));
+	var legendary = Math.floor(Math.random()*(legendary.length - 1));
 	return [riddle, legendary];
+}
+
+function getPattern(){
+	//iterate max everytime a new patter is added
+	var max = 2;
+	//pick random pattern
+	var type = Math.floor(Math.random() * (max - 1));
+	if(type == 0){ //fibonacci
+		var startIdx = Math.floor(Math.random() * (5 - 1));
+		return fibonacci.slice(startIdx, startIdx + 6);
+	}else if(type == 1){//primes
+		var startIdx = Math.floor(Math.random() * (5 - 1));
+		return primes.slice(startIdx, startIdx + 6);
+	}
 }
 
 const handlers = {
