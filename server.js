@@ -145,6 +145,33 @@ const riddleModeHandlers = Alexa.CreateStateHandler(states.RIDDLEMODE, {
 
 });
 
+const patternModeHandlers = Alexa.CreateStateHandler(states.RIDDLEMODE, {
+
+	'AMAZON.YesIntent': function() {
+		var pattern = getPattern();
+		var sequence = "";
+		for (var i = 0; i < 5; i++) {
+			sequence += pattern[i] + " ";
+		}
+		this.attributes['patternNext'] = pattern[5];
+		this.emit(':ask', "Complete the give the next number in the sequence " + sequence, sequence);
+	},
+
+	'AMAZON.NoIntent': function() {
+		this.emit(':tell', "Return when you are ready to be a hero. ");
+	},
+
+	'PatternAnswer': function() {
+		var answer = this.event.request.intent.slots.patternanswer.value;
+		if (this.attributes['patternNext'] == answer){
+			this.emit(':tell', "that's correct");
+		}else{
+			this.emit(':tell', "Incorrect");
+		}
+	}
+
+});
+
 exports.handler = function(event, context, callback) {
 	const alexa = Alexa.handler(event, context, callback);
 	alexa.APP_ID = APP_ID; // APP_ID is your skill id which can be found in the Amazon developer console where you create the skill.
