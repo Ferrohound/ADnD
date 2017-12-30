@@ -203,6 +203,7 @@ Enemy.prototype.Act = function(player, Alexa)
 	// 0 for regular
 	// 1 for magic
 	// 2 for special attack - well choreographed
+	// 3 unleash special attack! two-turned
 	switch(state)
 	{
 		case 0:
@@ -214,6 +215,10 @@ Enemy.prototype.Act = function(player, Alexa)
 		break;
 		
 		case 2:
+			this.state = 3;
+		break;
+		
+		case 3:
 			MagicAttack(this, player, Alexa);
 		break;
 		
@@ -232,6 +237,28 @@ Enemy.prototype.Description = function()
 		
 		default:
 			return "Something seems different... Hey! This isn't descriptive at all!";
+		break;
+	};
+}
+
+Enemy.prototype.Status = function()
+{
+	switch(state)
+	{
+		case 0:
+			if(this.hp > this.MaxHP/100 * 90)
+				return this.name + " is full of energy!";
+			else if(this.hp > this.MaxHP/100 * 30)
+				return this.name + " is full of energy!";
+			else
+				return this.name + " is struggling to stay conscious..";
+		break;
+		
+		case 2:
+			return this.name + " is charging up for a powerful attack!";
+		
+		case -1:
+			return this.name " lays unconscious on the floor.";
 		break;
 	};
 }
@@ -644,6 +671,12 @@ const battleModeHandlers = Alexa.CreateStateHandler(states.BATTLEMODE, {
 		{
 			//battle was won!
 			//this.handler.state = "BATTLEWON";
+		}
+		
+		//otherwise output the enemy's status
+		for(var i = 0; i<this.Enemies.length; i++)
+		{
+			this.emit(':tell', this.Enemies[i].Status());
 		}
 	}
 
