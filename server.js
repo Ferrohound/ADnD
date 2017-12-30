@@ -200,10 +200,21 @@ function Enemy(hp)
 //or hp
 Enemy.prototype.Act = function(player, Alexa)
 {
+	// 0 for regular
+	// 1 for magic
+	// 2 for special attack - well choreographed
 	switch(state)
 	{
 		case 0:
 			Attack(this, player, Alexa);
+		break;
+		
+		case 1:
+			MagicAttack(this, player, Alexa);
+		break;
+		
+		case 2:
+			MagicAttack(this, player, Alexa);
 		break;
 		
 		default:
@@ -231,24 +242,32 @@ function Player(hp)
 	this.hp = this.MaxHP = hp;
 	this.state = 0;
 	
-	this.agility = 1;
-	this.wisdom = 1;
-	this.strength = 1;
-	this.defense = 1;
-	this.skill = 1;
-	this.luck = 1;
+	this.agility = this.originalAgility = 0.1;
+	this.wisdom = 0.1;
+	this.strength = 0.1;
+	this.defense = this.originalDefense = 0.1;
+	this.skill = 0.1;
+	this.luck = 0.1;
 	
 	//for meditation
-	this.growthFactor = 0.5;
+	this.growthFactor = 0.25;
 };
 
 Player.prototype.Act = function(flag, Alexa, enemy = null)
 {
+	//flags
 	// 0: attack
 	// 1: magic attack
 	// 2: defense/evade
 	// 3: meditate
 	// 4: investigate
+	if(this.state == 1)
+	{
+		this.defense = this.originalDefense;
+		this.agility = this.originalAgility;
+		this.state = 0;
+	}
+	
 	switch(flag)
 	{
 		case 0:
@@ -263,11 +282,24 @@ Player.prototype.Act = function(flag, Alexa, enemy = null)
 		
 		case 2:
 			Alexa.emit(':tell', "You brace for impact!");
+			this.defense += getRandomArbitrary(0.1, this.growthFactor);
+			this.agility += getRandomArbitrary(0.1, this.growthFactor);
 			this.state = 1;
 		break;
 		
 		case 3:
 			//boost stats and heal a little bit
+			Alexa.emit(':tell', "...-!");
+			this.defense += getRandomArbitrary(0.1, this.growthFactor);
+			this.agility += getRandomArbitrary(0.1, this.growthFactor);
+			this.wisdom += getRandomArbitrary(0.1, this.growthFactor);
+			this.strength += getRandomArbitrary(0.1, this.growthFactor);
+			this.hp += getRandomArbitrary(0.1, this.growthFactor);
+			this.skill += getRandomArbitrary(0.1, this.growthFactor);
+			
+			//diminishing returns
+			this.growthFactor/=2;
+			
 			this.state = 0;
 		break;
 		
