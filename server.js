@@ -1,4 +1,13 @@
 //===============================================================================
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+}
+
+function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
+  
 /*
 enemies for the battle rooms
 */
@@ -7,20 +16,164 @@ enemies for the battle rooms
 //have player and enemy stats that play into this
 function Attack(A, D, Alexa)
 {
+	var HR = A.skill * 2 + A.luck/2;
+	var Evade = A.agility * 2 + A.luck;
+	
+	var Accuracy = HR - Evade;
+	
+	//check for hit
+	var hit = getRandomArbitrary(0, 1);
+	
+	//miss
+	if(hit > Accuracy)
+	{
+		Alexa.emit(':tell', "Critical hit!");
+		return;
+	}
+	
+	//calculate damage
+	var Attk = A.wisdom + A.skill/2;
+	var DP = D.wisdom;
+	
+	var dmg = Attk - DP;
+	
+	var CriticalHit = A.skill/2;
+	var CriticalEvade = D.luck;
+	
+	var Critical = CriticalHit - CriticalEvade;
+	
+	hit = getRandomArbitrary(0, 1);
+	if(hit < Critical)
+	{
+		dmg*=2;
+		D.hp-=dmg;
+		Alexa.emit(':tell', "Critical hit!");
+		
+		if(D.hp < 0)
+			D.state = -1;
+		
+		return;
+	}
+	
+	D.hp-=dmg;
+	
+	if(D.hp < 0)
+		D.state = -1;
+	
+	//damage tiers
+	//ineffective
+	//regular
+	//critical
+	if(dmg < (D.MaxHP/100) * 5)
+	{
+		Alexa.emit(':tell', "Not very effective..");
+		return;
+	}
+	
+	else
+	{
+		Alexa.emit(':tell', A.name + " strikes " D.name + " with all of their might!");
+		return;
+	}
+	
+	//fire emblem battle formulae
+	/*
+	Hit Rate = Weapon Accuracy + Skill x 2 + Luck / 2
+            + Support Bonus
+			
+	Avoid = Attack Speed x 2 + Luck + Terrain Bonus
+         + Support Bonus
+		 
+	Accuracy = Hit Rate (Attacker) - Evade (Defender)
+	
+	Defense Power
+	DP = Terrain Bonus + Defense
+      + Support Bonus
+	  
+	DP = Terrain Bonus + Resistance
+      + Support Bonus
+	  
+	Critical Rate = Weapon Critical + Skill / 2
+                 + Support Bonus + Class Critical
+				 
+	Critical Evade = Luck + Support Bonus
+	
+	Critical = Critical Rate - Critical Evade
+	
+	Physical Attack = Strength + (Weapon Might + Weapon Triangle Bonus) X 
+		Weapon effectiveness + Support Bonus
+		
+	Magical Attack = magic + (Magic Might + Trinity of Magic Bonus) X 
+		Magic Effectiveness + Support Bonus
+
 	D.hp--;
 	if(D.hp < 0)
 		D.state = -1;
 	
-	Alexa.emit(':tell', A.name + " strikes " D.name + " with all of their might!");
+	Alexa.emit(':tell', A.name + " strikes " D.name + " with all of their might!");*/
 }
 
 function MagicAttack(A, D, Alexa)
 {
-	D.hp--;
+	var HR = A.skill * 2 + A.luck/2;
+	var Evade = A.agility * 2 + A.luck;
+	
+	var Accuracy = HR - Evade;
+	
+	//check for hit
+	var hit = getRandomArbitrary(0, 1);
+	
+	//miss
+	if(hit > Accuracy)
+	{
+		Alexa.emit(':tell', "Missed!");
+		return;
+	}
+	
+	//calculate damage
+	var Attk = A.strength + A.skill/2;
+	var DP = D.defense;
+	
+	var dmg = Attk - DP;
+	
+	var CriticalHit = A.skill/2;
+	var CriticalEvade = D.luck;
+	
+	var Critical = CriticalHit - CriticalEvade;
+	
+	hit = getRandomArbitrary(0, 1);
+	if(hit < Critical)
+	{
+		dmg*=2;
+		D.hp-=dmg;
+		Alexa.emit(':tell', "Critical hit!");
+		
+		if(D.hp < 0)
+			D.state = -1;
+		
+		return;
+	}
+	
+	D.hp-=dmg;
+	
 	if(D.hp < 0)
 		D.state = -1;
 	
-	Alexa.emit(':tell', A.name + "'s magic ravages " D.name + "!");
+	//damage tiers
+	//ineffective
+	//regular
+	//critical
+	if(dmg < (D.MaxHP/100) * 5)
+	{
+		Alexa.emit(':tell', "Not very effective..");
+		return;
+	}
+	
+	else
+	{
+		Alexa.emit(':tell', A.name + "'s magic ravages " D.name + "!");
+		return;
+	}
 }
 
 
@@ -28,9 +181,19 @@ function MagicAttack(A, D, Alexa)
 //take in arguments later, ideally pass in an array of descriptions for each state it's in
 function Enemy(hp)
 {
-	this.hp = hp;
+	this.hp = this.MaxHP = hp;
 	this.state = 0;
 	this.name = "Spatos";
+	
+	this.agility = 1;
+	this.wisdom = 1;
+	this.strength = 1;
+	this.defense = 1;
+	this.skill = 1;
+	this.luck = 1;
+	
+	//for meditation
+	this.growthFactor = 0.5;
 };
 
 //have a thing in here that changes the enemy's state based on the player's previous actions
@@ -65,8 +228,18 @@ Enemy.prototype.Description = function()
 //state -1 means defeated
 function Player(hp)
 {
-	this.hp = hp;
+	this.hp = this.MaxHP = hp;
 	this.state = 0;
+	
+	this.agility = 1;
+	this.wisdom = 1;
+	this.strength = 1;
+	this.defense = 1;
+	this.skill = 1;
+	this.luck = 1;
+	
+	//for meditation
+	this.growthFactor = 0.5;
 };
 
 Player.prototype.Act = function(flag, Alexa, enemy = null)
@@ -74,7 +247,8 @@ Player.prototype.Act = function(flag, Alexa, enemy = null)
 	// 0: attack
 	// 1: magic attack
 	// 2: defense/evade
-	// 3: investigate
+	// 3: meditate
+	// 4: investigate
 	switch(flag)
 	{
 		case 0:
@@ -93,6 +267,11 @@ Player.prototype.Act = function(flag, Alexa, enemy = null)
 		break;
 		
 		case 3:
+			//boost stats and heal a little bit
+			this.state = 0;
+		break;
+		
+		case 4:
 			Enemy.Description();
 			this.state = 0;
 		break;
@@ -180,6 +359,44 @@ const RIDDLE_INCORRECT_REACTION = [
 	'The Naga bares his teeth. Dinner time. ',
 	'The Pixiu bares his teeth. Dinner time. '
 ]
+
+const PHYSICAL_EVASION_REACTION = [
+
+]
+
+const MAGIC_EVASION_REACTION = [
+
+]
+
+const PHYSICAL_HIT_REACTION = [
+
+]
+
+const MAGIC_HIT_REACTION = [
+
+]
+
+const PHYSICAL_CRITICAL_HIT_REACTION = 
+[
+
+]
+
+const PHYSICAL_CRITICAL_HIT_REACTION = 
+[
+
+]
+
+const PHYSICAL_INEFFECTIVE_REACTION = 
+[
+
+]
+
+const MAGIC_INEFFECTIVE_REACTION = 
+[
+
+]
+
+
 
 const RIDDLE_START = "The beast asks you a simple question. ";
 const CONTINUE = "Would you like to enter the next room? ";
@@ -281,8 +498,18 @@ const battleModeHandlers = Alexa.CreateStateHandler(states.BATTLEMODE, {
 
 	'AMAZON.YesIntent': function() {
 		this.State = 0;
+		
 		this.Enemies = [];
-		this.Player = new Player();
+		
+		//make a function for this later
+		var E = new Enemy(5);
+		this.Enemies.push(E);
+		var E = new Enemy(3);
+		this.Enemies.push(E);
+		var E = new Enemy(1);
+		this.Enemies.push(E);
+		
+		this.Player = new Player(10);
 		
 		this.emit(':tell', "Several creatures block your path!");
 		
@@ -350,6 +577,14 @@ const battleModeHandlers = Alexa.CreateStateHandler(states.BATTLEMODE, {
 		this.emitWithState("EnemyPhase");
 	}
 	
+	'Meditate': function()
+	{
+		this.Player.Act(3, this);
+		
+		//this.State = 1;
+		this.emitWithState("EnemyPhase");
+	}
+	
 	'EnemyPhase': function()
 	{
 		//enemy makes their move, state 3 means the player dies, otherwise the player 
@@ -379,41 +614,7 @@ const battleModeHandlers = Alexa.CreateStateHandler(states.BATTLEMODE, {
 			//this.handler.state = "BATTLEWON";
 		}
 	}
-	
-	/*
-	//winning or losing a battle
-	if(this.state == 2)
-	{
-		alert("You won the battle!");
-	}
-	else
-	{
-		alert("Your party was slain in battle...please try again!");
-	}
-	
-	//enemy makes their move, state 3 means the player dies, otherwise the player 
-	//takes their turn
-	for(var i = 0; i<this.Enemies.length; i++)
-	{
-		this.Enemies[i].Act(this.player);
-	}
-	if(this.player.state == -1)
-		this.state = 3;
-	else
-		this.state = 0;
-	
-	//after the player makes their move, check if all enemies are defeated, and if so,
-	//end the battle
-	
-	this.state = 2;
-				
-	for(var i = 0; i<this.Enemies.length; i++)
-	{
-		if(this.Enemies[i].state != -1)
-			this.state = 1;
-	}
-	
-	*/
+
 });
 
 exports.handler = function(event, context, callback) {
