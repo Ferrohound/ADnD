@@ -17,7 +17,7 @@ enemies for the battle rooms
 function Attack(A, D, Alexa)
 {
 	var HR = A.skill * 2 + A.luck/2;
-	var Evade = A.agility * 2 + A.luck;
+	var Evade = D.agility * 2 + D.luck;
 	
 	var Accuracy = HR - Evade;
 	
@@ -134,7 +134,7 @@ function Attack(A, D, Alexa)
 function MagicAttack(A, D, Alexa)
 {
 	var HR = A.skill * 2 + A.luck/2;
-	var Evade = A.agility * 2 + A.luck;
+	var Evade = D.casting * 2 + D.luck;
 	
 	var Accuracy = HR - Evade;
 	
@@ -150,8 +150,8 @@ function MagicAttack(A, D, Alexa)
 	}
 	
 	//calculate damage
-	var Attk = A.strength + A.skill/2;
-	var DP = D.defense;
+	var Attk = A.wisdom + A.skill/2;
+	var DP = D.wisdom;
 	
 	var dmg = Attk - DP;
 	
@@ -217,15 +217,16 @@ function Enemy(hp)
 	this.state = 0;
 	this.name = "Spatos";
 	
-	this.agility = 1;
-	this.wisdom = 1;
-	this.strength = 1;
-	this.defense = 1;
-	this.skill = 1;
-	this.luck = 1;
+	this.agility = 0.1;
+	this.casting = 0.1;
+	this.wisdom = 0.1;
+	this.strength = 0.1;
+	this.defense = 0.1;
+	this.skill = 0.1;
+	this.luck = 0.1;
 	
 	//for meditation
-	this.growthFactor = 0.5;
+	this.growthFactor = 0.25;
 };
 
 //have a thing in here that changes the enemy's state based on the player's previous actions
@@ -303,6 +304,7 @@ function Player(hp)
 	
 	this.agility = this.originalAgility = 0.1;
 	this.wisdom = 0.1;
+	this.casting = 0.1
 	this.strength = 0.1;
 	this.defense = this.originalDefense = 0.1;
 	this.skill = 0.1;
