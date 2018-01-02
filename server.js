@@ -66,30 +66,32 @@ function Attack(A, D, Alexa)
 	
 	D.hp-=dmg;
 	
-	//damage tiers
-	//ineffective
-	//regular
-	//critical
 	if(dmg < (D.MaxHP/100) * 5)
 	{
 		//Alexa.emit(':tell', "Not very effective..");
-		Alexa.emit(':tell', D.name + PHYSICAL_INEFFECTIVE_REACTION[getRandomInt(0, 5)]);
+		Alexa.emit(':tell', D.name + MAGIC_INEFFECTIVE_REACTION[getRandomInt(0, 5)]);
+		if(D.hp < 0)
+		{
+			Alexa.emit(':tell', "A sudden bolt of pain shoots through" +  
+				D.name + "'s body. They slump to the ground; their body can't take anymore.");
+			D.state = -1;
+		}
 	}
 	
 	else
 	{
-		Alexa.emit(':tell', D.name + PHYSICAL_HIT_REACTION[getRandomInt(0, 5)]);
-		//Alexa.emit(':tell', A.name + " strikes " D.name + " with all of their might!");
-	}
-	
-	if(D.hp < 0)
-	{
-		Alexa.emit(':tell', D.name + " struggles to get back to their feet but collapses..");
-		D.state = -1;
-	}
-	else
-	{
-		Alexa.emit(':tell', D.name + " gets back on their feet, determined to keep fighting!");
+		//Alexa.emit(':tell', A.name + "'s magic ravages " D.name + "!");
+		Alexa.emit(':tell', D.name + MAGIC_HIT_REACTION[getRandomInt(0, 5)]);
+		
+		if(D.hp < 0)
+		{
+			Alexa.emit(':tell', D.name + " struggles to get back to their feet but collapses..");
+			D.state = -1;
+		}
+		else
+		{
+			Alexa.emit(':tell', D.name + " gets back on their feet, determined to keep fighting!");
+		}
 	}
 	
 	return;
@@ -187,22 +189,28 @@ function MagicAttack(A, D, Alexa)
 	{
 		//Alexa.emit(':tell', "Not very effective..");
 		Alexa.emit(':tell', D.name + MAGIC_INEFFECTIVE_REACTION[getRandomInt(0, 5)]);
+		if(D.hp < 0)
+		{
+			Alexa.emit(':tell', "A sudden bolt of pain shoots through" +  
+				D.name + "'s body. They slump to the ground; their body can't take anymore.");
+			D.state = -1;
+		}
 	}
 	
 	else
 	{
 		//Alexa.emit(':tell', A.name + "'s magic ravages " D.name + "!");
 		Alexa.emit(':tell', D.name + MAGIC_HIT_REACTION[getRandomInt(0, 5)]);
-	}
-	
-	if(D.hp < 0)
-	{
-		Alexa.emit(':tell', D.name + " struggles to get back to their feet but collapses..");
-		D.state = -1;
-	}
-	else
-	{
-		Alexa.emit(':tell', D.name + " gets back on their feet, determined to keep fighting!");
+		
+		if(D.hp < 0)
+		{
+			Alexa.emit(':tell', D.name + " struggles to get back to their feet but collapses..");
+			D.state = -1;
+		}
+		else
+		{
+			Alexa.emit(':tell', D.name + " gets back on their feet, determined to keep fighting!");
+		}
 	}
 	
 	return;
