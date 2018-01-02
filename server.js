@@ -27,7 +27,8 @@ function Attack(A, D, Alexa)
 	//miss
 	if(hit > Accuracy)
 	{
-		Alexa.emit(':tell', "Critical hit!");
+		//Alexa.emit(':tell', "Miss!");
+		Alexa.emit(':tell', D.name + PHYSICAL_EVASION_REACTION[getRandomInt(0, 5)]);
 		return;
 	}
 	
@@ -47,18 +48,23 @@ function Attack(A, D, Alexa)
 	{
 		dmg*=2;
 		D.hp-=dmg;
-		Alexa.emit(':tell', "Critical hit!");
+		Alexa.emit(':tell', A.name + " summons forth all of their strength! Critical hit!");
+		Alexa.emit(':tell', D.name + PHYSICAL_CRITICAL_HIT_REACTION[getRandomInt(0, 5)]);
 		
 		if(D.hp < 0)
+		{
+			Alexa.emit(':tell', D.name + " struggles to get back to their feet but collapses..");
 			D.state = -1;
+		}
+		else
+		{
+			Alexa.emit(':tell', D.name + " gets back on their feet, determined to keep fighting!");
+		}
 		
 		return;
 	}
 	
 	D.hp-=dmg;
-	
-	if(D.hp < 0)
-		D.state = -1;
 	
 	//damage tiers
 	//ineffective
@@ -66,15 +72,27 @@ function Attack(A, D, Alexa)
 	//critical
 	if(dmg < (D.MaxHP/100) * 5)
 	{
-		Alexa.emit(':tell', "Not very effective..");
-		return;
+		//Alexa.emit(':tell', "Not very effective..");
+		Alexa.emit(':tell', D.name + PHYSICAL_INEFFECTIVE_REACTION[getRandomInt(0, 5)]);
 	}
 	
 	else
 	{
-		Alexa.emit(':tell', A.name + " strikes " D.name + " with all of their might!");
-		return;
+		Alexa.emit(':tell', D.name + PHYSICAL_HIT_REACTION[getRandomInt(0, 5)]);
+		//Alexa.emit(':tell', A.name + " strikes " D.name + " with all of their might!");
 	}
+	
+	if(D.hp < 0)
+	{
+		Alexa.emit(':tell', D.name + " struggles to get back to their feet but collapses..");
+		D.state = -1;
+	}
+	else
+	{
+		Alexa.emit(':tell', D.name + " gets back on their feet, determined to keep fighting!");
+	}
+	
+	return;
 	
 	//fire emblem battle formulae
 	/*
@@ -126,7 +144,8 @@ function MagicAttack(A, D, Alexa)
 	//miss
 	if(hit > Accuracy)
 	{
-		Alexa.emit(':tell', "Missed!");
+		//Alexa.emit(':tell', "Missed!");
+		Alexa.emit(':tell', D.name + MAGIC_EVASION_REACTION[getRandomInt(0, 5)]);
 		return;
 	}
 	
@@ -146,34 +165,47 @@ function MagicAttack(A, D, Alexa)
 	{
 		dmg*=2;
 		D.hp-=dmg;
-		Alexa.emit(':tell', "Critical hit!");
+		Alexa.emit(':tell', A.name + " summons forth all of their strength! Critical hit!");
+		Alexa.emit(':tell', D.name + MAGIC_CRITICAL_HIT_REACTION[getRandomInt(0, 5)]);
 		
 		if(D.hp < 0)
+		{
+			Alexa.emit(':tell', D.name + " struggles to get back to their feet but collapses..");
 			D.state = -1;
+		}
+		else
+		{
+			Alexa.emit(':tell', D.name + " gets back on their feet, determined to keep fighting!");
+		}
 		
 		return;
 	}
 	
 	D.hp-=dmg;
 	
-	if(D.hp < 0)
-		D.state = -1;
-	
-	//damage tiers
-	//ineffective
-	//regular
-	//critical
 	if(dmg < (D.MaxHP/100) * 5)
 	{
-		Alexa.emit(':tell', "Not very effective..");
-		return;
+		//Alexa.emit(':tell', "Not very effective..");
+		Alexa.emit(':tell', D.name + MAGIC_INEFFECTIVE_REACTION[getRandomInt(0, 5)]);
 	}
 	
 	else
 	{
-		Alexa.emit(':tell', A.name + "'s magic ravages " D.name + "!");
-		return;
+		//Alexa.emit(':tell', A.name + "'s magic ravages " D.name + "!");
+		Alexa.emit(':tell', D.name + MAGIC_HIT_REACTION[getRandomInt(0, 5)]);
 	}
+	
+	if(D.hp < 0)
+	{
+		Alexa.emit(':tell', D.name + " struggles to get back to their feet but collapses..");
+		D.state = -1;
+	}
+	else
+	{
+		Alexa.emit(':tell', D.name + " gets back on their feet, determined to keep fighting!");
+	}
+	
+	return;
 }
 
 
@@ -385,7 +417,6 @@ const helpful = [
 
 const legendary = [
 	'Sphynx',
-	'Deva',
 	'Basilisk',
 	'Lich',
 	'Naga',
@@ -394,65 +425,94 @@ const legendary = [
 
 const LEGENDARY_DESCRIPTION = [
 	'Pawing gently towards you is a terrifying beast. It has the head of a man in an ornate head dress, with the body of a lion. It is the mighty sphynx. ',
-	'A Deva looks at you. It is a Deva. ',
 	'The entire room is wrapped with thick scaley vines as black as night. It is impossible to tell where the body of the snake ends, but it begins at the head which rises before you, as the powerful Basilisk smells dinner. ',
-	'A Lich looks at you. It is a Lich. ',
-	'A Naga looks at you. It is a Naga. ',
-	'A Pixiu looks at you. It is a Pixiu. '
+	'Vile fumes fill your lungs as you enter the room. A lone, skeletal figure garbed in extravagant robes stands amid the stench. It turns to face you, and your knees buckle under the pressure of the Lich\'s hollow gaze.',
+	'A thick tail wraps itself around your leg, effortlessly hoisting you off the ground. As you struggle to escape, the beautiful woman it is attached to throws her head back in laughter at your pitiful attempt to escape. It\'s time to have some fun.',
+	'Mounds of gold and silver so tall they seem to touch the heavens surround you. You excitedly begin to stuff your pockets but a large golden paw flicks downwards and pins your squirming body to the ground. The colossal beast it belongs to has the body of a lion but the wings of an eagle. The Pixiu smells its gold in your wallet...'
 ];
 
 const RIDDLE_CORRECT_REACTION = [
 	'The Sphynx bares his teeth. You are correct, you may pass. ',
-	'The Deva tells you you are correct and may pass. ',
 	'The Basilisk hisses violently and pulls his head back. You are correct, you may pass. ',
-	'The Lich tells you you are correct and may pass. ',
-	'The Naga tells you you are correct and may pass. ',
-	'The Pixiu tells you you are correct and may pass. '
+	'The Lich\'s bony fingers reach out as if to claw your face, but an unknown force holds it back. It lazily gestures towards the doorway on the opposite end of the room before skulking back to the darkness, awaiting its next victim.',
+	'The Naga claps her hands with glee, filling your ear with more laughter as she drops you onto the floor. Well done. She moves aside and shows you the next door. ',
+	'The Pixiu huffs, flicking its tail side to side in frustration. You\'re smarter than you look. Get out of here. '
 ];
 
 const RIDDLE_INCORRECT_REACTION = [
 	'The Sphynx bares his teeth. Dinner time. ',
-	'The Deva bares its teeth. Dinner time. ',
 	'The Basilisk bares his teeth. Dinner time. ',
-	'The Lich bares his teeth. Dinner time. ',
-	'The Naga bares his teeth. Dinner time. ',
-	'The Pixiu bares his teeth. Dinner time. '
+	'The room echoes with a horrible screech as the Lich raises its glowing staff. It\'s over for you. ',
+	'The Naga\'s tail tightens around your waist, squeezing the life out of you; her laughter is all you can hear. Your time is up. ',
+	'The Pixiu bares his fangs. Dinner time. It pounces and munches the gold in your wallet before its paw launches you against the wall, knocking you unconscious... '
 ]
 
 const PHYSICAL_EVASION_REACTION = [
-
+	" nimbly jumps out of the way of the attack!",
+	" narrowly dodges the blow!",
+	" closes their eyes, allowing their body to move on its own. Instinct takes over and they dodge the strikes!",
+	" trips, falling out of the way of the attack!",
+	" skillfully bobs and weaves to evade the strikes!"
 ]
 
 const MAGIC_EVASION_REACTION = [
-
+	" dives to the ground, barely dodging the hex!",
+	" swerves to evade the spell!",
+	" jumps to the side; the spell hits the wall behind them!",
+	" nimbly jumps out of the way!",
+	" ducks, narrowly dodging the hex!"
 ]
 
 const PHYSICAL_HIT_REACTION = [
-
+	" is sent flying into the nearby wall!",
+	" is knocked backwards by the force of the strike!",
+	" gets knocked off their feet!",
+	" gets flung through the pillar behind themselves!",
+	" winces in pain, stumbling backwards!"
 ]
 
 const MAGIC_HIT_REACTION = [
-
+	"'s body is violently flung back!",
+	" gets scorched by the blazing inferno!",
+	" gets struck by pillars of ice!",
+	" is pushed back by an en enormous gust of wind!",
+	" is swept off their feet by vines!"
 ]
 
 const PHYSICAL_CRITICAL_HIT_REACTION = 
 [
-
+	"'s body gets cut deep!",
+	" was caught off guard; they're slammed into the ground!",
+	" is winded by the force of the strike! They double over gasping for breath!",
+	" is flung into the ceiling, denting it, before falling back to the ground!",
+	" gets sent spiralling into a nearby pillar, breaking right through it!"
 ]
 
 const PHYSICAL_CRITICAL_HIT_REACTION = 
 [
-
+	" is engulfed in flame far hotter than they anticipated!",
+	" is flung back with enough force to knock them through the dungeon wall!",
+	" gets squeezed tight by a mess of thorny vines!",
+	"'s arm gets pierced by shards of ice!",
+	" is swept off their feet by a powerful tempest!"
 ]
 
 const PHYSICAL_INEFFECTIVE_REACTION = 
 [
-
+	" staggers backwards but seems to be unphased!",
+	" blocks the strike with their arm! They seem unaffected.",
+	" smiles. Is that all you've got?",
+	" spits out a tooth. Don't tell me that's the best you can do!",
+	" laughs as the blows fail to deal any significant damage!"
 ]
 
 const MAGIC_INEFFECTIVE_REACTION = 
 [
-
+	" chuckles. The spell bounces right off of them",
+	" deflects the hex with their cloak. Despite being pushed back, they seem fine!",
+	" walks through the summoned flames towards their foe, unphased.",
+	" rapidly punches the summoned ice, breaking their way through!",
+	" cuts their way through the summoned vines with ease!"
 ]
 
 
