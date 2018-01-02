@@ -53,12 +53,12 @@ function Attack(A, D, Alexa)
 		
 		if(D.hp < 0)
 		{
-			Alexa.emit(':tell', D.name + " struggles to get back to their feet but collapses..");
+			Alexa.emit(':tell', D.name + DEFEAT[getRandomInt(0,5)]);
 			D.state = -1;
 		}
 		else
 		{
-			Alexa.emit(':tell', D.name + " gets back on their feet, determined to keep fighting!");
+			Alexa.emit(':tell', D.name + RECOVERY[getRandomInt(0,5)]);
 		}
 		
 		return;
@@ -85,12 +85,12 @@ function Attack(A, D, Alexa)
 		
 		if(D.hp < 0)
 		{
-			Alexa.emit(':tell', D.name + " struggles to get back to their feet but collapses..");
+			Alexa.emit(':tell', D.name + DEFEAT[getRandomInt(0,5)]);
 			D.state = -1;
 		}
 		else
 		{
-			Alexa.emit(':tell', D.name + " gets back on their feet, determined to keep fighting!");
+			Alexa.emit(':tell', D.name + RECOVERY[getRandomInt(0,5)]);
 		}
 	}
 	
@@ -172,12 +172,12 @@ function MagicAttack(A, D, Alexa)
 		
 		if(D.hp < 0)
 		{
-			Alexa.emit(':tell', D.name + " struggles to get back to their feet but collapses..");
+			Alexa.emit(':tell', D.name + DEFEAT[getRandomInt(0,5)]);
 			D.state = -1;
 		}
 		else
 		{
-			Alexa.emit(':tell', D.name + " gets back on their feet, determined to keep fighting!");
+			Alexa.emit(':tell', D.name + RECOVERY[getRandomInt(0,5)]);
 		}
 		
 		return;
@@ -204,12 +204,12 @@ function MagicAttack(A, D, Alexa)
 		
 		if(D.hp < 0)
 		{
-			Alexa.emit(':tell', D.name + " struggles to get back to their feet but collapses..");
+			Alexa.emit(':tell', D.name + DEFEAT[getRandomInt(0,5)]);
 			D.state = -1;
 		}
 		else
 		{
-			Alexa.emit(':tell', D.name + " gets back on their feet, determined to keep fighting!");
+			Alexa.emit(':tell', D.name + RECOVERY[getRandomInt(0,5)]);
 		}
 	}
 	
@@ -358,7 +358,7 @@ Player.prototype.Act = function(flag, Alexa, enemy = null)
 		
 		case 3:
 			//boost stats and heal a little bit
-			Alexa.emit(':tell', "...-!");
+			Alexa.emit(':tell', "...-! You clear your mind and gain new insight.");
 			this.defense += getRandomArbitrary(0.1, this.growthFactor);
 			this.agility += getRandomArbitrary(0.1, this.growthFactor);
 			this.wisdom += getRandomArbitrary(0.1, this.growthFactor);
@@ -523,6 +523,24 @@ const MAGIC_INEFFECTIVE_REACTION =
 	" walks through the summoned flames towards their foe, unphased.",
 	" rapidly punches the summoned ice, breaking their way through!",
 	" cuts their way through the summoned vines with ease!"
+]
+
+const RECOVERY
+[
+	" gets back on their feet, determined to keep fighting!",
+	" jumps to their feet. It isn't over yet!",
+	" struggle back to their feet. They can keep going!",
+	" musters the strength to rise.",
+	" won't stay down. They rise again, ready to continue the fight!"
+]
+
+const DEFEAT
+[
+	" struggles to get back to their feet but collapses..",
+	" can't take any more. They lose consciousness.",
+	" lays on their back, exhausted...",
+	" tries to push their body, but it gives out. They black out.",
+	" makes an attempt to get up, but can't. They're past their limit."
 ]
 
 
